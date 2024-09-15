@@ -5,13 +5,13 @@ This repository contains a car driving simulation using Deep Q-Networks (DQN). T
 ## Features
 
 - **New Environment**: A new city map is used for training the simulation.
-  ![City Map](https://github.com/Azreal18/car-game/blob/main/images/citymap.png)
+  ![City Map](./images/citymap.png)
   
 - **Road Mapping**: A mask is created to map the roads.
-  ![Road Mask](https://github.com/Azreal18/car-game/blob/main/images/MASK1.png)
+  ![Road Mask](./images/MASK1.png)
   
 - **Random Destinations**: There are 3 destinations on the map which are randomly selected in each turn and shown with the following icon.
-  ![Target Icon](https://github.com/Azreal18/car-game/blob/main/images/target.png)
+  ![Target Icon](./images/target.png)
 
 ## Installation
 
@@ -40,7 +40,7 @@ python map.py
 - [`car.kv`](./car.kv): Kivy language file defining the UI layout.
 - [`images/`](./images/): Directory containing images used in the simulation.
 - [`requirements.txt`](./requirements.txt): List of dependencies required to run the project.
-- ['code.md'](./code.md): Sudo code to explain whats happening
+- [`code.md`](./code.md): Sudo code to explain whats happening
 
 
 ## Classes and Methods
