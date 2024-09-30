@@ -1,30 +1,32 @@
 # AI for Self Driving Car
+
 # Importing the libraries
-# import numpy as np
+
+import numpy as np
 import random
 import os
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
-# import torch.autograd as autograd
+import torch.autograd as autograd
 from torch.autograd import Variable
 
 # Creating the architecture of the Neural Network
-SAVE_PATH = 'last_brain.pth'
+
 class Network(nn.Module):
     
     def __init__(self, input_size, nb_action):
         super(Network, self).__init__()
         self.input_size = input_size
         self.nb_action = nb_action
-        self.fc1 = nn.Linear(input_size, 50)
-        self.fc2 = nn.Linear(50, 50)
-        self.fc3 = nn.Linear(50, nb_action)
+        self.fc1 = nn.Linear(input_size, 30)
+        self.fc2 = nn.Linear(30, 15)
+        self.fc3 = nn.Linear(15, nb_action)
     
     def forward(self, state):
         x = F.relu(self.fc1(state))
-        x = F.relu(self.fc2(x))
+        x = self.fc2(x)
         q_values = self.fc3(x)
         return q_values
 
@@ -60,19 +62,13 @@ class Dqn():
         self.last_reward = 0
     
     def select_action(self, state):
-        # if temparature is reduced then after it learns to go though a perticular road
-        # it does not explore much and sticks to the same road even if it cannot reach 
-        # the targets. 
-        probs = F.softmax(self.model(Variable(state, volatile = True))*100)
+        probs = F.softmax(self.model(Variable(state, volatile = True))*100) # T=100
         action = probs.multinomial(1)
         return action.data[0,0]
     
     def learn(self, batch_state, batch_next_state, batch_reward, batch_action):
         outputs = self.model(batch_state).gather(1, batch_action.unsqueeze(1)).squeeze(1)
         next_outputs = self.model(batch_next_state).detach().max(1)[0]
-        # if gamma is reduced, the car roams around without trying to learn anything 
-        # it does not try avoid sand or reach the targets. This happens as the agent 
-        # focuses more on immediate rewards and not on future rewards.
         target = self.gamma*next_outputs + batch_reward
         td_loss = F.smooth_l1_loss(outputs, target)
         self.optimizer.zero_grad()
@@ -100,7 +96,7 @@ class Dqn():
     def save(self):
         torch.save({'state_dict': self.model.state_dict(),
                     'optimizer' : self.optimizer.state_dict(),
-                   }, SAVE_PATH)
+                   }, 'last_brain.pth')
     
     def load(self):
         if os.path.isfile('last_brain.pth'):

@@ -2,7 +2,7 @@
 # ref: https://kivy.org/docs/tutorials/pong.html
 
 <Car>:
-    size: 20, 10
+    size: 10, 20
     origin: 10, 5
     canvas:
         PushMatrix
@@ -12,16 +12,7 @@
         Rectangle:
             pos: self.pos
             size: self.size
-            source: "./images_new/car.png"
-        PopMatrix
-<Target>:
-    size: 20, 30
-    canvas:
-        PushMatrix
-        Rectangle:
-            pos: self.pos
-            size: self.size
-            source: "./images_new/target.png"
+            source: "./images/car.png"
         PopMatrix
 
 <Ball1>:
@@ -50,25 +41,48 @@
             pos: self.pos
             size: self.size
 
+<Goal1>:
+    size: 15,15
+    canvas:
+        Color:
+            rgba: 1.0, 0.0, 0.0, 1.0
+        Ellipse:
+            pos: self.pos
+            size: self.size
+<Goal2>:
+    size: 15,15
+    canvas:
+        Color:
+            rgba: 0.0, 1.0, 0.0, 1.0
+        Ellipse:
+            pos: self.pos
+            size: self.size
+
+<Goal3>:
+    size: 15,15
+    canvas:
+        Color:
+            rgba: 0.0, 0.0, 1.0, 1.0
+        Ellipse:
+            pos: self.pos
+            size: self.size
 
 <Game>:
     car: game_car
-    target: game_target
     ball1: game_ball1
     ball2: game_ball2
     ball3: game_ball3
-
+    goal1: game_goal1
+    goal2: game_goal2
+    goal3: game_goal3
     canvas:
         Rectangle:
             pos: self.pos
-            size: 1583, 731
-            source: "./images_new/citymap_wmask.png"
+            size: 1228, 760
+            source: "./images/citymap.png"
 
     Car:
         id: game_car
-        center: self.parent.center
-    Target:
-        id: game_target
         center: self.parent.center
     Ball1:
         id: game_ball1
@@ -79,4 +93,12 @@
     Ball3:
         id: game_ball3
         center: self.parent.center
-
+    Goal1:
+        id: game_goal1
+        center: self.parent.center
+    Goal2:
+        id: game_goal2
+        center: self.parent.center
+    Goal3:
+        id: game_goal3
+        center: self.parent.center

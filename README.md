@@ -69,8 +69,10 @@ A class for handling user input and drawing on the canvas.
 
 The main Kivy application class.
 
-
+## Answers to the questions based on Assignment 24 can be found - [`questions`](./questions.md)
 ## Sudo Code for '__init__'
+
+More sudo codes are present in ![`Code`](./code.md)
 
 This method initializes the DQN model with the given parameters.
 
@@ -84,3 +86,4 @@ class Dqn:
         initialize optimizer for the neural network
         initialize replay memory
 ```
+

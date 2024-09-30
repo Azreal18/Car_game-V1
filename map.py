@@ -1,8 +1,11 @@
 # Self Driving Car
+
 # Importing the libraries
 import numpy as np
-import random
+from random import random, randint
+import matplotlib.pyplot as plt
 import time
+
 # Importing the Kivy packages
 from kivy.app import App
 from kivy.uix.widget import Widget
@@ -22,10 +25,8 @@ from ai import Dqn
 # Adding this line if we don't want the right click to put a red point
 Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
 Config.set('graphics', 'resizable', False)
-Config.set('graphics', 'width', '1583')
-Config.set('graphics', 'height', '731')
-
-
+Config.set('graphics', 'width', '1228')
+Config.set('graphics', 'height', '760')
 
 # Introducing last_x and last_y, used to keep the last point in memory when we draw the sand on the map
 last_x = 0
@@ -34,16 +35,14 @@ n_points = 0
 length = 0
 
 # Getting our AI, which we call "brain", and that contains our neural network that represents our Q-function
-brain = Dqn(5,3,0.9)
+brain = Dqn(5,3,0.95)
 action2rotation = [0,5,-5]
 last_reward = 0
 scores = []
 im = CoreImage("./images/MASK1.png")
 
+# textureMask = CoreImage(source="./kivytest/simplemask1.png")
 
-targets_list = [(1470, 70),
-                (165, 227),
-                (812, 560)]
 
 # Initializing the map
 first_update = True
@@ -55,11 +54,11 @@ def init():
     sand = np.zeros((longueur,largeur))
     img = PILImage.open("./images/mask.png").convert('L')
     sand = np.asarray(img)/255
-    random_target = random.choice(targets_list)
-    goal_x = random_target[0]
-    goal_y = random_target[1]
+    goal_x = 316
+    goal_y = 579
     first_update = False
-
+    global swap
+    swap = 0
 
 
 # Initializing the last distance
@@ -111,8 +110,11 @@ class Ball2(Widget):
     pass
 class Ball3(Widget):
     pass
-
-class Target(Widget):
+class Goal1(Widget):
+    pass
+class Goal2(Widget):
+    pass
+class Goal3(Widget):
     pass
 
 # Creating the game class
@@ -120,17 +122,16 @@ class Target(Widget):
 class Game(Widget):
 
     car = ObjectProperty(None)
-    target = ObjectProperty(None)
     ball1 = ObjectProperty(None)
     ball2 = ObjectProperty(None)
     ball3 = ObjectProperty(None)
-    
+    goal1 = ObjectProperty(None)
+    goal2 = ObjectProperty(None)
+    goal3 = ObjectProperty(None)
 
     def serve_car(self):
         self.car.center = self.center
         self.car.velocity = Vector(6, 0)
-    
-
 
     def update(self, dt):
 
@@ -142,6 +143,8 @@ class Game(Widget):
         global goal_y
         global longueur
         global largeur
+        global swap
+        
 
         longueur = self.width
         largeur = self.height
@@ -157,48 +160,50 @@ class Game(Widget):
         rotation = action2rotation[action]
         self.car.move(rotation)
         distance = np.sqrt((self.car.x - goal_x)**2 + (self.car.y - goal_y)**2)
-        
-        self.target.pos = (goal_x, goal_y)
-        
         self.ball1.pos = self.car.sensor1
         self.ball2.pos = self.car.sensor2
         self.ball3.pos = self.car.sensor3
-
+        self.goal1.pos = (316, 579)
+        self.goal2.pos = (712, 266)
+        self.goal3.pos = (1091, 608)
 
         if sand[int(self.car.x),int(self.car.y)] > 0:
             self.car.velocity = Vector(0.5, 0).rotate(self.car.angle)
             print(1, goal_x, goal_y, distance, int(self.car.x),int(self.car.y), im.read_pixel(int(self.car.x),int(self.car.y)))
-            
-            last_reward = -1
+            #print(1, sand[int(self.car.x),int(self.car.y)])
+            last_reward = -0.8
         else: # otherwise
-            self.car.velocity = Vector(2, 0).rotate(self.car.angle)
-            last_reward = -0.2
+            self.car.velocity = Vector(1.0, 0).rotate(self.car.angle)
+            last_reward =  -0.1
             print(0, goal_x, goal_y, distance, int(self.car.x),int(self.car.y), im.read_pixel(int(self.car.x),int(self.car.y)))
+            #print(0, sand[int(self.car.x),int(self.car.y)])
             if distance < last_distance:
-                last_reward = 0.1
-            # else:
-            #     last_reward = last_reward +(-0.2)
+                last_reward = 0.8
+
 
         if self.car.x < 5:
             self.car.x = 5
-            last_reward = -1
+            last_reward = -0.5
         if self.car.x > self.width - 5:
             self.car.x = self.width - 5
-            last_reward = -1
+            last_reward = -0.5
         if self.car.y < 5:
             self.car.y = 5
-            last_reward = -1
+            last_reward = -0.5
         if self.car.y > self.height - 5:
             self.car.y = self.height - 5
-            last_reward = -1
+            last_reward = -0.5
 
         if distance < 25:
-            random_target = random.choice(targets_list)
-            while goal_x == random_target[0] and goal_y == random_target[1]:
-                random_target = random.choice(targets_list)
-            goal_x = random_target[0]
-            goal_y = random_target[1]
-            
+            if swap == 1:
+                goal_x, goal_y = self.goal3.pos
+                swap = 2
+            elif swap == 2:
+                goal_x, goal_y = self.goal1.pos
+                swap = 0
+            else:
+                goal_x, goal_y = self.goal2.pos
+                swap = 1
         last_distance = distance
 
 # Adding the painting tools
@@ -209,7 +214,7 @@ class MyPaintWidget(Widget):
         global length, n_points, last_x, last_y
         with self.canvas:
             Color(0.8,0.7,0)
-
+            d = 10.
             touch.ud['line'] = Line(points = (touch.x, touch.y), width = 10)
             last_x = int(touch.x)
             last_y = int(touch.y)
@@ -217,7 +222,6 @@ class MyPaintWidget(Widget):
             length = 0
             sand[int(touch.x),int(touch.y)] = 1
             img = PILImage.fromarray(sand.astype("uint8")*255)
-
             img.save("./images/sand.jpg")
 
     def on_touch_move(self, touch):
@@ -236,13 +240,13 @@ class MyPaintWidget(Widget):
             last_x = x
             last_y = y
 
+# Adding the API Buttons (clear, save and load)
 
 class CarApp(App):
 
     def build(self):
         parent = Game()
         parent.serve_car()
-        # parent.serve_target()
         Clock.schedule_interval(parent.update, 1.0/60.0)
         self.painter = MyPaintWidget()
         clearbtn = Button(text = 'clear')
@@ -265,7 +269,8 @@ class CarApp(App):
     def save(self, obj):
         print("saving brain...")
         brain.save()
-
+        plt.plot(scores)
+        plt.show()
 
     def load(self, obj):
         print("loading last saved brain...")
